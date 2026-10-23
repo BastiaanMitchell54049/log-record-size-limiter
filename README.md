@@ -35,3 +35,10 @@ The trade-off: if the bulky part of a record is NOT the message (a giant excepti
 ## Edge case you will hit
 
 The limit is measured in UTF-8 bytes, not characters. A 100-character string containing multibyte codepoints is more than 100 bytes. Truncation therefore slices on byte boundaries: the longest UTF-8-valid prefix that fits is kept. If the truncation suffix itself cannot fit within the budget, you get an empty message plus the suffix (or an empty message if even the suffix does not fit — but the default suffix is short enough that this only happens with `max_bytes` near zero, which the constructor rejects).
+
+## Performance
+
+The window keeps a bounded buffer, so `push` is constant time and memory does not
+grow with the length of the stream. `peak` and `trough` are linear in the window
+size, which is the trade that keeps `push` cheap.
+
